@@ -1,0 +1,52 @@
+ # Copyright (c) 2022, salesforce.com, inc.
+ # All rights reserved.
+ # SPDX-License-Identifier: BSD-3-Clause
+ # For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+
+
+datasets:
+  nuscenes_radarllm:
+    build_info:
+      # Splits to build — must match NuScenes split names ("train" / "val")
+      splits: ["train", "val"]
+
+      dataset_config:
+        # Path to the nuScenes dataset root (must contain v1.0-*, samples/, sweeps/, maps/)
+        dataroot: "/home/renault/repo/radarllm/dataset"
+        # nuScenes version: "trainval" | "mini" | "test"
+        version: "trainval"
+        #name of the QA dataset : nuScenesQA or LiDAR-LLM-Nu-Caption
+        dataset_name: "LiDAR-LLM-Nu-Caption"
+
+        # -- Radar / voxel encoder settings --
+        radar_encoder_type: "voxel_net"
+        nsweeps: 3
+        use_radar_filters: false
+        use_shallow_metadata: true
+        use_radar_occupancy_map: false
+
+        # -- 3-D voxel grid definition --
+        # bounds: [XMIN, XMAX, YMIN, YMAX, ZMIN, ZMAX]  (metres)
+        bounds: [-49.75, 49.75, -49.75, 49.75, -5.0, 5.0]
+        # res_3d: [Z, Y, X]
+        res_3d: [200, 8, 200]
+        # centroid: [cx, cy, cz]
+        centroid: [0.0, 0.0, 0.0]
+
+        # -- Camera / augmentation  --
+        final_dim: [128, 352]
+        resize_lim: null
+        resize_scale: 0.3
+        crop_offset: 0
+        ncams: 6
+        cams:
+          - "CAM_FRONT_LEFT"
+          - "CAM_FRONT"
+          - "CAM_FRONT_RIGHT"
+          - "CAM_BACK_LEFT"
+          - "CAM_BACK"
+          - "CAM_BACK_RIGHT"
+
+        # -- Map / segmentation flags  --
+        use_obj_layer_only_on_map: false
+

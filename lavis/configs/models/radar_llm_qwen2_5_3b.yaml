@@ -1,0 +1,38 @@
+ # Copyright (c) 2022, salesforce.com, inc.
+ # All rights reserved.
+ # SPDX-License-Identifier: BSD-3-Clause
+ # For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+
+
+#TODO NEED TO CHANGE MAYBE
+model:
+  arch: pretrain_qwen2_5_3B
+  load_finetuned: False
+  load_pretrained: True
+
+  pretrained: "/home/renault/repo/models/Qwen2.5-3B-Instruct" #Need to change to the path of the pretrained model
+  finetuned: ""
+
+  # Q-Former
+  num_query_token: 32
+
+  # T5
+  t5_model: "/home/renault/repo/models/Qwen2.5-3B-Instruct"
+
+  # generation configs
+  prompt: ""
+
+
+preprocess:
+    vis_processor:
+        train:
+          name: "blip_image_train"
+          image_size: 224
+        eval:
+          name: "blip_image_eval"
+          image_size: 224
+    text_processor:
+        train:
+          name: "blip_caption"
+        eval:
+          name: "blip_caption"
