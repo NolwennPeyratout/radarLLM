@@ -1,0 +1,93 @@
+ # Copyright (c) 2022, salesforce.com, inc.
+ # All rights reserved.
+ # SPDX-License-Identifier: BSD-3-Clause
+ # For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/BSD-3-Clause
+
+model:
+  arch: radar_llm_qwen
+  model_type: qwen2.5-3B-Instruct
+  has_lora: True
+  load_finetuned: False
+  use_grad_checkpoint: True
+  llm_model: "/home/renault/repo/models/Qwen2.5-3B-Instruct"
+  load_pretrained: True #If True need to have a pretrained: path (in this config file )
+  #pretrained: "/home/renault/repo/radarllm/lavis/output/radarLLM/radar_captioning/20260505152/checkpoint_0.pth"
+  #pretrained: "/home/renault/repo/radarllm/lavis/output/radarLLM/radar_captioning/20260515100/checkpoint_2.pth" #Path to pretrained model, used if load_pretrained is True
+  pretrained: "/home/renault/repo/radarllm/lavis/output/radarLLM/pretrain_stage1_radarllm/20260603100/checkpoint_9.pth" #Path to pretrained model, used if load_pretrained is True
+  load_qformer_pretrained: False #Whether to load pretrained qformer, used if load_pretrained is True
+  qformer_pretrained: "/home/renault/repo/LAVIS/models/blip2_pretrained_flant5xl.pth" #Path to pretrained qformer, used if load_pretrained is True and load_qformer_pretrained is True
+  load_voxelnet_pretrained: False #Whether to load pretrained voxelnet, used if load_pretrained is True
+  voxelnet_pretrained: "/home/renault/repo/radarllm/model_checkpoints/BEVCar/BEVCar_model-000050000.pth" #Path to pretrained voxelnet, used if load_pretrained is True and load_voxelnet_pretrained is True
+  
+  #radar encoder parameters
+  radar_encoder_type: 'voxel_net'
+  radar_encoder_freeze: true
+  use_rpn_radar: false  #not used in the current version of the code, set to false
+  train_task: 'both' #not used in the current version of the code, set to 'both'
+  use_radar: true #only true will work in the current version of the code, set to true
+  use_radar_filters: false #not used in the current version of the code, set to false
+  use_radar_encoder: true # only true will work in the current version of the code, set to true
+  use_metaradar: false #not used in the current version of the code, set to false
+  use_shallow_metadata: true #Use the 3 metadata from radar : RCS, relative velocity in 2 directions
+  use_pre_scaled_imgs: false #not used in the current version of the code, set to false
+  use_obj_layer_only_on_map: true #not used in the current version of the code, set to true
+  init_query_with_image_feats: true #not used in the current version of the code, set to true
+  do_rgbcompress: true #not used in the current version of the code, set to true
+  do_shuffle_cams: true # not used, but originally used to shuffle the order of the cameras during training, set to true for shuffling and false for no shuffling
+  use_multi_scale_img_feats: true #not used in the current version of the code, set to true
+  num_layers: 6 #not used in the current version of the code, set to 6 for 6 layers in the qformer
+
+  #voxnelnet debug flags
+  save_radar_bev_debug: False
+  radar_bev_debug_dir: "outputs/radar_bev_debug"
+  radar_bev_debug_max_items: 1
+
+  #chat template flags
+  use_chat_template: True
+  use_radar_token: True
+  radar_token: "<radar>"
+  include_system_prompt: True #Whether to include a system prompt in the input, set to True to include and False to not include
+  system_prompt: "You are an AI assistant in an autonomous vehicle. You receive information from the vehicle's radars, and you answer questions about the vehicle's surroundings based on that information."
+
+datasets:
+  nuscenes_radarllm: # must match @registry.register_builder name
+    {}
+
+run:
+  task: radar_captioning
+  # optimizer
+  lr_sched: "linear_warmup_cosine_lr"
+  init_lr: 1e-5
+  min_lr: 0
+  warmup_lr: 1e-8
+  warmup_steps: 1000
+  weight_decay: 0.05 #Weight decay in the AdamW optimizer
+  max_epoch: 5 #ideal 10, set to 1 for testing
+
+  batch_size_train: 4
+  batch_size_eval: 4
+  num_workers: 0
+  accum_grad_iters: 4 #update the model every accum_grad_iters steps
+
+  max_len: 200
+  min_len: 8
+  num_beams: 5
+
+  report_metric: True #Whether to report evaluation metric (e.g., BLEU/METEOR/ROUGE) during validation. 
+  annotation_file: "/home/renault/repo/radarllm/dataset/LiDAR-LLM-Nu-Caption/val.json" #Path to annotation file, used for evaluation
+
+  seed: 42
+  output_dir: "output/radarLLM/radar_captioning"
+
+  amp: True #Automatic mixed precision training
+  resume_ckpt_path: null
+
+  evaluate: False #Whether to run only evaluation, set to True for evaluation and False for training and evaluation
+  train_splits: ["train"]
+  valid_splits: ["val"]
+  use_dist_eval_sampler: True #Use ditributed sampler for evaluation, set to False for no distributed sampler during evaluation
+
+  device: "cuda"
+  world_size: 2
+  dist_url: "env://"
+  distributed: True #For parallelization

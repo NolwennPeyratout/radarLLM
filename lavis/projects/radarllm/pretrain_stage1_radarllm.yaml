@@ -1,0 +1,77 @@
+# Copyright (c) 2022, salesforce.com, inc.
+# All rights reserved.
+# SPDX-License-Identifier: BSD-3-Clause
+
+model:
+  arch: radarllm_qformer
+  model_type: pretrain
+
+  load_finetuned: False
+  load_pretrained: False
+  pretrained: ""
+
+  # Radar geometry
+  Z_rad: 200
+  Y_rad: 8
+  X_rad: 200
+  latent_dim: 128
+
+  # Radar encoder
+  use_radar_occupancy_map: False
+  use_rpn_radar: False
+  use_shallow_metadata: true #Use the 3 metadata from radar : RCS, relative velocity in 2 directions
+
+  # QFormer and losses setup
+  num_query_token: 32
+  qformer_text_input: True
+  max_txt_len: 128
+  embed_dim: 256
+  # ITM weight — final value once the warmup ramp is complete
+  itm_loss_weight: 0.5
+  # Number of global gradient steps over which ITM weight is linearly ramped
+  # from 0 to itm_loss_weight.
+  itm_warmup_steps: 2000
+
+  # Optional initialization
+  load_qformer_pretrained: False
+  qformer_pretrained: "/home/renault/repo/LAVIS/models/blip2_pretrained_flant5xl.pth"
+
+  load_voxelnet_pretrained: True
+  voxelnet_pretrained: "/home/renault/repo/radarllm/model_checkpoints/BEVCar/BEVCar_model-000050000.pth"
+
+datasets:
+  nuscenes_radarllm:
+    {}
+
+run:
+  task: radar_text_pretrain
+
+  lr_sched: "linear_warmup_cosine_lr"
+  init_lr: 1e-4
+  min_lr: 1e-5
+  warmup_lr: 1e-6
+  warmup_steps: 1000
+  weight_decay: 0.05 #Weight decay in the AdamW optimizer
+
+  max_epoch: 20
+  batch_size_train: 2
+  batch_size_eval: 4
+  num_workers: 0
+  accum_grad_iters: 2 #update the model every accum_grad_iters steps
+
+  report_metric: False
+
+  seed: 42
+  output_dir: "output/radarLLM/pretrain_stage1_radarllm"
+
+  amp: True #Automatic mixed precision training
+  resume_ckpt_path: null
+
+  evaluate: False
+  train_splits: ["train"]
+  use_dist_eval_sampler: True #Use ditributed sampler for evaluation, set to False for no distributed sampler during evaluation
+
+  device: "cuda"
+  world_size: 2
+  dist_url: "env://"
+  distributed: True
