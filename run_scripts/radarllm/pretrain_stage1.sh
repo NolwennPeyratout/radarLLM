@@ -1,0 +1,1 @@
+python -m torch.distributed.run --nproc_per_node=2 train.py --cfg-path lavis/projects/radarllm/pretrain_stage1_radarllm.yaml
