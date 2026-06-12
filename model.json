@@ -1,0 +1,178 @@
+{
+  "DataParallel": {
+    "module": {
+      "RadarLLM": {
+        "radar_encoder": {
+          "VoxelNet": {
+            "svfe": {
+              "SVFE": {
+                "vfe_1": {
+                  "VFE": {
+                    "fcn": {
+                      "FCN": {
+                        "linear": {
+                          "type": "Linear",
+                          "in_features": 7,
+                          "out_features": 16,
+                          "bias": true
+                        },
+                        "bn": {
+                          "type": "BatchNorm1d",
+                          "num_features": 16,
+                          "eps": 1e-05,
+                          "momentum": 0.1,
+                          "affine": true,
+                          "track_running_stats": true
+                        }
+                      }
+                    }
+                  }
+                },
+                "vfe_2": {
+                  "VFE": {
+                    "fcn": {
+                      "FCN": {
+                        "linear": {
+                          "type": "Linear",
+                          "in_features": 32,
+                          "out_features": 64,
+                          "bias": true
+                        },
+                        "bn": {
+                          "type": "BatchNorm1d",
+                          "num_features": 64,
+                          "eps": 1e-05,
+                          "momentum": 0.1,
+                          "affine": true,
+                          "track_running_stats": true
+                        }
+                      }
+                    }
+                  }
+                },
+                "fcn": {
+                  "FCN": {
+                    "linear": {
+                      "type": "Linear",
+                      "in_features": 128,
+                      "out_features": 128,
+                      "bias": true
+                    },
+                    "bn": {
+                      "type": "BatchNorm1d",
+                      "num_features": 128,
+                      "eps": 1e-05,
+                      "momentum": 0.1,
+                      "affine": true,
+                      "track_running_stats": true
+                    }
+                  }
+                }
+              }
+            },
+            "cml": {
+              "CML": {
+                "conv3d_1": {
+                  "Conv3dBlock": {
+                    "conv": {
+                      "in_channels": 128,
+                      "out_channels": 64,
+                      "kernel_size": [3, 3, 3],
+                      "stride": [2, 1, 1],
+                      "padding": [1, 1, 1]
+                    },
+                    "bn": {
+                      "type": "BatchNorm3d",
+                      "num_features": 64
+                    }
+                  }
+                },
+                "conv3d_2": {
+                  "Conv3dBlock": {
+                    "conv": {
+                      "in_channels": 64,
+                      "out_channels": 64,
+                      "kernel_size": [3, 3, 3],
+                      "stride": [1, 1, 1],
+                      "padding": [0, 1, 1]
+                    },
+                    "bn": {
+                      "type": "BatchNorm3d",
+                      "num_features": 64
+                    }
+                  }
+                },
+                "conv3d_3": {
+                  "Conv3dBlock": {
+                    "conv": {
+                      "in_channels": 64,
+                      "out_channels": 64,
+                      "kernel_size": [3, 3, 3],
+                      "stride": [1, 1, 1],
+                      "padding": [1, 1, 1]
+                    },
+                    "bn": {
+                      "type": "BatchNorm3d",
+                      "num_features": 64
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+
+        "Qformer": {
+          "BertLMHeadModel": {
+            "hidden_size": 768,
+            "num_layers": 12,
+            "num_attention_heads": 12,
+            "cross_attention": true
+          }
+        },
+
+        "qwen_model": {
+          "Qwen2_5_VLForConditionalGeneration": {
+            "visual": {
+              "VisionTransformer": {
+                "patch_embed": {
+                  "Conv3d": {
+                    "in_channels": 3,
+                    "out_channels": 1280,
+                    "kernel_size": [2, 14, 14],
+                    "stride": [2, 14, 14],
+                    "bias": false
+                  }
+                },
+                "num_blocks": 32,
+                "hidden_dim": 1280
+              }
+            },
+            "language_model": {
+              "Qwen2_5_VLModel": {
+                "vocab_size": 151936,
+                "hidden_size": 2048,
+                "num_layers": 36
+              }
+            },
+            "lm_head": {
+              "Linear": {
+                "in_features": 2048,
+                "out_features": 151936,
+                "bias": false
+              }
+            }
+          }
+        },
+
+        "qwen_proj": {
+          "Linear": {
+            "in_features": 768,
+            "out_features": 2048,
+            "bias": true
+          }
+        }
+      }
+    }
+  }
+}
